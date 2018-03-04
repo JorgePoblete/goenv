@@ -36,8 +36,8 @@ type OtherConf struct {
 	VarInt    int
 }
 
-func (c *Config) Load() {
-	load(reflect.ValueOf(c), "", "")
+func Load(conf interface{}) {
+	load(reflect.ValueOf(conf), "", "")
 }
 
 func load(conf reflect.Value, envTag, envDefault string) {
@@ -85,6 +85,6 @@ func load(conf reflect.Value, envTag, envDefault string) {
 
 func main() {
 	conf := Config{}
-	conf.Load()
+	Load(&conf)
 	fmt.Printf("\nReaded conf: %+v\n", conf)
 }
