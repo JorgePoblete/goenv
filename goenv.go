@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"reflect"
 	"strconv"
+	"strings"
 )
 
 type Config struct {
@@ -24,6 +26,7 @@ type SomeConf struct {
 	// also we can define a default value in case the env is not set
 	VarString string `env:"STRING" envDefault:"ClassicStringIsClassic"`
 	VarInt    int    `env:"INT" envDefault:"1313"`
+	VarFile   string `env:"OTHER" envDefault:"fileNotReaded`
 }
 
 type SubSomeConf struct {
@@ -52,9 +55,24 @@ func load(conf reflect.Value, envTag, envDefault string) {
 		// we should only keep going if we can set values
 		if reflectedConf.IsValid() && reflectedConf.CanSet() {
 			value, ok := os.LookupEnv(envTag)
-			// if the env variable is not set we just use the envDefault
+			// if the env variable search for file config
 			if !ok {
-				value = envDefault
+				fileName, ok := os.LookupEnv(fmt.Sprintf("%s_FILE", envTag))
+				// if config file is not set we just use the envDefault
+				if !ok {
+					value = envDefault
+				} else {
+					// read the file
+					b, err := ioutil.ReadFile(fileName) // just pass the file name
+					if err != nil {
+						fmt.Print(err)
+					} else {
+						value = string(b)
+					}
+				}
+			}
+			if envTag != "" && value == "" && !strings.HasSuffix(envTag, "_") {
+				fmt.Printf("Config for %s missing\n", envTag)
 			}
 			switch reflectedConf.Kind() {
 			case reflect.Struct:
