@@ -1,40 +1,10 @@
-package main
+package goenv
 
 import (
-	"fmt"
 	"os"
 	"reflect"
 	"strconv"
 )
-
-type Config struct {
-	//Some will be loaded from env
-	Some SomeConf `env:"SOME_"`
-
-	SubSome SubSomeConf `env:"SUB_"`
-
-	//Other not because it doesnt have the required tag
-	Other OtherConf
-}
-
-type SomeConf struct {
-	// Here we can set the next part of the env name,
-	// the final env variable name will be formed by the
-	// concatenation of all the env tags found until a single type is found,
-	// also we can define a default value in case the env is not set
-	VarString string `env:"STRING" envDefault:"ClassicStringIsClassic"`
-	VarInt    int    `env:"INT" envDefault:"1313"`
-}
-
-type SubSomeConf struct {
-	ImBool bool     `env:"BOOL"`
-	Some   SomeConf `env:"SOME_"`
-}
-
-type OtherConf struct {
-	VarString string
-	VarInt    int
-}
 
 func Load(conf interface{}) {
 	load(reflect.ValueOf(conf), "", "")
@@ -81,10 +51,4 @@ func load(conf reflect.Value, envTag, envDefault string) {
 
 	}
 
-}
-
-func main() {
-	conf := Config{}
-	Load(&conf)
-	fmt.Printf("\nReaded conf: %+v\n", conf)
 }
